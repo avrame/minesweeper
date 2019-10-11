@@ -1,0 +1,17 @@
+.section {
+    text-align: center;
+    line-height: 1.8;
+    width: 32px;
+    height: 32px;
+    margin: 1px;
+    background: #8D8;
+    border: 1px solid #6B6;
+    box-sizing: border-box;
+    display: inline-block;
+    border-radius: 2px;
+}
+.section.revealed {
+    background-image: none;
+    background-color: #EEE;
+    border-color: #CCC;
+}
