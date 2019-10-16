@@ -3,43 +3,55 @@ import Section from './components/section';
 import { DIFFICULTY } from './constants';
 import './App.css';
 
-const FIELD_WIDTH = 10;
-const FIELD_HEIGHT = 10;
+const FIELD_WIDTH = {
+  [DIFFICULTY.EASY]: 5,
+  [DIFFICULTY.MED]: 10,
+  [DIFFICULTY.HARD]: 25
+};
+const FIELD_HEIGHT = {
+  [DIFFICULTY.EASY]: 5,
+  [DIFFICULTY.MED]: 10,
+  [DIFFICULTY.HARD]: 15
+};
 const BOMB_FREQ = .15;
 
-const fieldStyle = {
-  width: `${FIELD_WIDTH * 34}px`,
-}
-
+let setDifficulty = DIFFICULTY.MED;
 
 function App() {
-  const [difficulty, setDifficulty] = useState(DIFFICULTY.MED);
+  const [tempDifficulty, setTempDifficulty] = useState(DIFFICULTY.MED);
   const [field, setField] = useState([]);
   const [gameWon, setGameWon] = useState(false);
   const [gameLost, setGameLost] = useState(false);
 
+  const fieldStyle = {
+    width: `${FIELD_WIDTH[setDifficulty] * 34}px`,
+  }
+
   useEffect(() => {
-    let initialField = initializeField();
-    initialField = calculateBombCounts(initialField);
-    
-    setField(initialField)
+    startNewGame();
   }, []);
 
   function startNewGame() {
-
+    setDifficulty = tempDifficulty;
+    setGameWon(false);
+    setGameLost(false);
+    let initialField = initializeField();
+    initialField = calculateBombCounts(initialField);
+    
+    setField(initialField);
   }
 
   function changeDifficulty(e) {
-    setDifficulty(e.target.value);
+    setTempDifficulty(e.target.value);
   }
 
   function initializeField() {
     let initialField = [];
 
     // Set the intial field state with bombs
-    for (let rowIdx = 0; rowIdx < FIELD_HEIGHT; rowIdx++) {
+    for (let rowIdx = 0; rowIdx < FIELD_HEIGHT[setDifficulty]; rowIdx++) {
       let row = [];
-      for (let colIdx = 0; colIdx < FIELD_WIDTH; colIdx++) {
+      for (let colIdx = 0; colIdx < FIELD_WIDTH[setDifficulty]; colIdx++) {
         const content = (Math.random() <= BOMB_FREQ) ? -1 : 0;
         row.push({ status: 'h', content });
       }
@@ -50,8 +62,8 @@ function App() {
   }
 
   function calculateBombCounts(field) {
-    for (let rowIdx = 0; rowIdx < FIELD_HEIGHT; rowIdx++) {
-      for (let colIdx = 0; colIdx < FIELD_WIDTH; colIdx++) {
+    for (let rowIdx = 0; rowIdx < FIELD_HEIGHT[setDifficulty]; rowIdx++) {
+      for (let colIdx = 0; colIdx < FIELD_WIDTH[setDifficulty]; colIdx++) {
         if (field[rowIdx][colIdx].content === 0) {
           for (let r = rowIdx - 1; r <= rowIdx + 1; r++) {
             for (let c = colIdx - 1; c <= colIdx + 1; c++) {
@@ -112,8 +124,8 @@ function App() {
   }
 
   function hasWonGame(field) {
-    for (let row = 0; row < FIELD_HEIGHT; row++) {
-      for (let col = 0; col < FIELD_WIDTH; col++) {
+    for (let row = 0; row < FIELD_HEIGHT[setDifficulty]; row++) {
+      for (let col = 0; col < FIELD_WIDTH[setDifficulty]; col++) {
         if (field[row][col].content !== -1 && field[row][col].status === 'h') {
           return false;
         }
@@ -176,7 +188,7 @@ function App() {
       <p>
         <button onClick={startNewGame}>Start a New Game</button>
         &nbsp;with&nbsp;
-        <select onChange={changeDifficulty} value={difficulty}>
+        <select onChange={changeDifficulty} value={tempDifficulty}>
           <option value={DIFFICULTY.EASY}>Easy</option>
           <option value={DIFFICULTY.MED}>Medium</option>
           <option value={DIFFICULTY.HARD}>Hard</option>
