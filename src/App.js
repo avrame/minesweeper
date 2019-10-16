@@ -1,18 +1,71 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Section from './components/section';
+import { DIFFICULTY } from './constants';
 import './App.css';
 
-function App() {
-  const [field, setField] = useState([
-    [{ status: 'h', content:  1 }, { status: 'h', content:  1 }, { status: 'h', content:  1 }, { status: 'h', content:  0 }, { status: 'h', content:  0 }],
-    [{ status: 'h', content:  1 }, { status: 'h', content: -1 }, { status: 'h', content:  2 }, { status: 'h', content:  1 }, { status: 'h', content:  0 }],
-    [{ status: 'h', content:  1 }, { status: 'h', content:  2 }, { status: 'h', content: -1 }, { status: 'h', content:  1 }, { status: 'h', content:  0 }],
-    [{ status: 'h', content:  0 }, { status: 'h', content:  1 }, { status: 'h', content:  1 }, { status: 'h', content:  1 }, { status: 'h', content:  0 }],
-    [{ status: 'h', content:  0 }, { status: 'h', content:  0 }, { status: 'h', content:  0 }, { status: 'h', content:  0 }, { status: 'h', content:  0 }],
-  ]);
+const FIELD_WIDTH = 10;
+const FIELD_HEIGHT = 10;
+const BOMB_FREQ = .15;
 
-  const fieldStyle = {
-    width: `${field[0].length * 34}px`,
+const fieldStyle = {
+  width: `${FIELD_WIDTH * 34}px`,
+}
+
+
+function App() {
+  const [difficulty, setDifficulty] = useState(DIFFICULTY.MED);
+  const [field, setField] = useState([]);
+  const [gameWon, setGameWon] = useState(false);
+  const [gameLost, setGameLost] = useState(false);
+
+  useEffect(() => {
+    let initialField = initializeField();
+    initialField = calculateBombCounts(initialField);
+    
+    setField(initialField)
+  }, []);
+
+  function startNewGame() {
+
+  }
+
+  function changeDifficulty(e) {
+    setDifficulty(e.target.value);
+  }
+
+  function initializeField() {
+    let initialField = [];
+
+    // Set the intial field state with bombs
+    for (let rowIdx = 0; rowIdx < FIELD_HEIGHT; rowIdx++) {
+      let row = [];
+      for (let colIdx = 0; colIdx < FIELD_WIDTH; colIdx++) {
+        const content = (Math.random() <= BOMB_FREQ) ? -1 : 0;
+        row.push({ status: 'h', content });
+      }
+      initialField.push(row);
+    }
+
+    return initialField;
+  }
+
+  function calculateBombCounts(field) {
+    for (let rowIdx = 0; rowIdx < FIELD_HEIGHT; rowIdx++) {
+      for (let colIdx = 0; colIdx < FIELD_WIDTH; colIdx++) {
+        if (field[rowIdx][colIdx].content === 0) {
+          for (let r = rowIdx - 1; r <= rowIdx + 1; r++) {
+            for (let c = colIdx - 1; c <= colIdx + 1; c++) {
+              if (field[r] && field[r][c] && (r !== rowIdx || c !== colIdx)) {
+                if (field[r][c].content === -1) {
+                  field[rowIdx][colIdx].content++;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return field;
   }
 
   function updateField (row, col, cb) {
@@ -53,6 +106,20 @@ function App() {
       revealNeighbors(newField, row, col);
     }
     setField(newField);
+    if (hasWonGame(newField)) {
+      setGameWon(true);
+    }
+  }
+
+  function hasWonGame(field) {
+    for (let row = 0; row < FIELD_HEIGHT; row++) {
+      for (let col = 0; col < FIELD_WIDTH; col++) {
+        if (field[row][col].content !== -1 && field[row][col].status === 'h') {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   function revealNeighbors(newField, row, col) {
@@ -71,6 +138,9 @@ function App() {
   }
 
   function handleRevealSections (row, col) {
+    // If the game has been won or lost, don't reveal the section
+    if (gameWon || gameLost) return;
+
     if (field[row][col].content === -1) {
       // We revealed a bomb!
       endGame(row, col);
@@ -96,10 +166,28 @@ function App() {
       });
     });
     setField(newField);
+    setGameLost(true);
   }
 
   return (
     <div className="App">
+      <h1>Minesweeper</h1>
+
+      <p>
+        <button onClick={startNewGame}>Start a New Game</button>
+        &nbsp;with&nbsp;
+        <select onChange={changeDifficulty} value={difficulty}>
+          <option value={DIFFICULTY.EASY}>Easy</option>
+          <option value={DIFFICULTY.MED}>Medium</option>
+          <option value={DIFFICULTY.HARD}>Hard</option>
+        </select>
+        &nbsp;difficulty.
+      </p>
+
+      { gameWon ? <h2 className="game-won">You Won! <span role="img" aria-label="happy face">😄</span></h2> : null }
+
+      { gameLost ? <h2 className="game-lost">You Lost <span role="img" aria-label="sad face">😢</span></h2> : null }
+
       <div className="field" style={fieldStyle}>
         {
           field.map((row, rowIdx) => {

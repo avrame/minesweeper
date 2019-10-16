@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './index.css';
 
 function Section ({ row, col, data, onRevealSections, onFlag }) {
@@ -24,7 +24,7 @@ function Section ({ row, col, data, onRevealSections, onFlag }) {
         case 'r': {
             revealedClass = ' revealed';
             if (content === -1) {
-                displayContent = <img src="/img/bomb.png" width="28" height="28" />;
+                displayContent = <img src="/img/bomb.png" alt="bomb" width="28" height="28" />;
             } else if (content === 0) {
                 displayContent = '';
             } else {
@@ -33,12 +33,12 @@ function Section ({ row, col, data, onRevealSections, onFlag }) {
             break;
         }
         case 'f': {
-            displayContent = <img src="/img/red-flag.svg" width="28" height="28" />
+            displayContent = <img src="/img/red-flag.svg" alt="red flag" width="28" height="28" />
             break;
         }
         case 'e': {
             revealedClass = ' revealed';
-            displayContent = <img src="/img/explosion.png" width="28" height="28" />;
+            displayContent = <img src="/img/explosion.png" alt="exploded bomb" width="28" height="28" />;
             break;
         }
         default: {
