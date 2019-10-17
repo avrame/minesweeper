@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Section from './components/section';
 import { DIFFICULTY } from './constants';
 import './App.css';
@@ -16,27 +16,48 @@ const FIELD_HEIGHT = {
 const BOMB_FREQ = .15;
 
 let setDifficulty = DIFFICULTY.MED;
+let timerID;
 
 function App() {
   const [tempDifficulty, setTempDifficulty] = useState(DIFFICULTY.MED);
   const [field, setField] = useState([]);
   const [gameWon, setGameWon] = useState(false);
   const [gameLost, setGameLost] = useState(false);
+  const [seconds, setSeconds] = useState(0);
 
   const fieldStyle = {
     width: `${FIELD_WIDTH[setDifficulty] * 34}px`,
   }
 
+  const savedCallback = useRef();
+
   useEffect(() => {
     startNewGame();
+    return () => clearInterval(timerID);
   }, []);
+
+  useEffect(() => {
+    savedCallback.current = callback;
+  });
+
+  function callback() {
+    setSeconds(seconds + 1);
+  }
 
   function startNewGame() {
     setDifficulty = tempDifficulty;
+
+    // Clear out the won/lost states
     setGameWon(false);
     setGameLost(false);
+    setSeconds(0);
+
+    // Initialize the mine field
     let initialField = initializeField();
     initialField = calculateBombCounts(initialField);
+
+    clearInterval(timerID);
+    timerID = setInterval(() => { savedCallback.current() }, 1000);
     
     setField(initialField);
   }
@@ -119,6 +140,7 @@ function App() {
     }
     setField(newField);
     if (hasWonGame(newField)) {
+      clearInterval(timerID);
       setGameWon(true);
     }
   }
@@ -166,6 +188,7 @@ function App() {
   }
 
   function endGame(row, col) {
+    clearInterval(timerID);
     const newField = field.map((rowArr, rowIdx) => {
       return rowArr.map((section, colIdx) => {
         let newSection = { ...section };
@@ -179,6 +202,23 @@ function App() {
     });
     setField(newField);
     setGameLost(true);
+  }
+
+  const minutes = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+
+  let minutesStr;
+  let secondsStr;
+
+  if (minutes < 10) {
+    minutesStr = `0${minutes}`;
+  } else {
+    minutesStr = minutes;
+  }
+  if (secs < 10) {
+    secondsStr = `0${secs}`
+  } else {
+    secondsStr = secs;
   }
 
   return (
@@ -195,6 +235,10 @@ function App() {
         </select>
         &nbsp;difficulty.
       </p>
+
+      <div>
+        Time: <span>{minutesStr}:{secondsStr}</span>
+      </div>
 
       { gameWon ? <h2 className="game-won">You Won! <span role="img" aria-label="happy face">😄</span></h2> : null }
 

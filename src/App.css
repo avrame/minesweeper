@@ -5,5 +5,8 @@
 .field {
   display: flex;
   flex-wrap: wrap;
-  margin: 100px auto;
+  position: absolute;
+  left: 50%;
+  top: 214px;
+  transform: translateX(-50%);
 }
