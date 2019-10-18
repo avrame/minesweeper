@@ -6,16 +6,14 @@ function Section ({ row, col, data, onRevealSections, onFlag }) {
 
     function handleLeftClick (e) {
         e.preventDefault();
-        if (status !== 'f') {
-            onRevealSections(row, col);
-        }
+        if (status === 'f') return;
+        onRevealSections(row, col);
     }
 
     function handleRightClick (e) {
         e.preventDefault();
-        if (status !== 'r') {
-            onFlag(row, col);
-        }
+        if (status === 'r') return;
+        onFlag(row, col);
     }
 
     let displayContent;

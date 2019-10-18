@@ -50,11 +50,6 @@ function App() {
   }, [tempDifficulty]);
 
   useEffect(() => {
-    startNewGame();
-    return () => clearInterval(timerID);
-  }, [startNewGame]);
-
-  useEffect(() => {
     savedCallback.current = callback;
   });
 
