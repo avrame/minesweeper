@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Section from './components/section';
 import { DIFFICULTY } from './constants';
 import './App.css';
@@ -31,20 +31,7 @@ function App() {
 
   const savedCallback = useRef();
 
-  useEffect(() => {
-    startNewGame();
-    return () => clearInterval(timerID);
-  }, []);
-
-  useEffect(() => {
-    savedCallback.current = callback;
-  });
-
-  function callback() {
-    setSeconds(seconds + 1);
-  }
-
-  function startNewGame() {
+  const startNewGame = useCallback(() => {
     setDifficulty = tempDifficulty;
 
     // Clear out the won/lost states
@@ -60,6 +47,19 @@ function App() {
     timerID = setInterval(() => { savedCallback.current() }, 1000);
     
     setField(initialField);
+  }, [tempDifficulty]);
+
+  useEffect(() => {
+    startNewGame();
+    return () => clearInterval(timerID);
+  }, [startNewGame]);
+
+  useEffect(() => {
+    savedCallback.current = callback;
+  });
+
+  function callback() {
+    setSeconds(seconds + 1);
   }
 
   function changeDifficulty(e) {

@@ -15,3 +15,8 @@
     background-color: #EEE;
     border-color: #CCC;
 }
+
+.section span[rel=img] {
+    font-size: 24px;
+    line-height: 1.3;
+}
