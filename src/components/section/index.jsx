@@ -26,7 +26,7 @@ function Section ({ row, col, data, onRevealSections, onFlag }) {
             if (content === -1) {
                 displayContent = <span rel="img" aria-label="bomb">💣</span>;
             } else if (content === 0) {
-                displayContent = '';
+                displayContent = null;
             } else {
                 displayContent = content;
             }
