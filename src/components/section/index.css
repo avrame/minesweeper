@@ -10,6 +10,9 @@
     display: inline-block;
     border-radius: 2px;
 }
+.section:hover {
+    background: #7C7;
+}
 .section.revealed {
     background-image: none;
     background-color: #EEE;
