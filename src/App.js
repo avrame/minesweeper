@@ -153,6 +153,11 @@ function App() {
         &nbsp;difficulty.
       </p>
 
+      <p className="instructions">
+        Left Click: Reveal<br />
+        Right Click: Flag
+      </p>
+
       <div>
         Time: <span>{minutesStr}:{secondsStr}</span>
       </div>

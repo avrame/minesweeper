@@ -7,6 +7,10 @@
   flex-wrap: wrap;
   position: absolute;
   left: 50%;
-  top: 214px;
+  top: 248px;
   transform: translateX(-50%);
+}
+
+.instructions {
+  font-size: 14px;
 }
