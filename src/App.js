@@ -1,5 +1,12 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Section from './components/section';
+import {
+  calculateBombCounts,
+  hasWonGame,
+  initializeField,
+  revealNeighbors,
+  updateField
+} from './lib';
 import { DIFFICULTY, FIELD_WIDTH, FIELD_HEIGHT, BOMB_FREQ } from './constants';
 import './App.css';
 
@@ -28,8 +35,8 @@ function App() {
     setSeconds(0);
 
     // Initialize the mine field
-    let initialField = initializeField();
-    initialField = calculateBombCounts(initialField);
+    let initialField = initializeField(setDifficulty);
+    initialField = calculateBombCounts(initialField, setDifficulty);
 
     clearInterval(timerID);
     timerID = setInterval(() => { savedCallback.current() }, 1000);
@@ -49,56 +56,9 @@ function App() {
     setTempDifficulty(e.target.value);
   }
 
-  function initializeField() {
-    let initialField = [];
-
-    // Set the intial field state with bombs
-    for (let rowIdx = 0; rowIdx < FIELD_HEIGHT[setDifficulty]; rowIdx++) {
-      let row = [];
-      for (let colIdx = 0; colIdx < FIELD_WIDTH[setDifficulty]; colIdx++) {
-        const content = (Math.random() <= BOMB_FREQ) ? -1 : 0;
-        row.push({ status: 'h', content });
-      }
-      initialField.push(row);
-    }
-
-    return initialField;
-  }
-
-  function calculateBombCounts(field) {
-    for (let rowIdx = 0; rowIdx < FIELD_HEIGHT[setDifficulty]; rowIdx++) {
-      for (let colIdx = 0; colIdx < FIELD_WIDTH[setDifficulty]; colIdx++) {
-        if (field[rowIdx][colIdx].content === 0) {
-          for (let r = rowIdx - 1; r <= rowIdx + 1; r++) {
-            for (let c = colIdx - 1; c <= colIdx + 1; c++) {
-              if (field[r] && field[r][c] && (r !== rowIdx || c !== colIdx)) {
-                if (field[r][c].content === -1) {
-                  field[rowIdx][colIdx].content++;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    return field;
-  }
-
-  function updateField (row, col, cb) {
-    const newField = field.map((rowArr, rowIdx) => {
-      return rowArr.map((section, colIdx) => {
-        let newSection = {...section};
-        if (row === rowIdx && col === colIdx) {
-          newSection = cb(newSection);
-        }
-        return newSection;
-      });
-    });
-    return newField;
-  }
-
   function handleFlag (row, col) {
-    const newField = updateField(row, col, section => {
+    if (gameWon) return;
+    const newField = updateField(field, row, col, section => {
       if (section.status === 'f') {
         section.status = 'h';
       } else {
@@ -114,7 +74,7 @@ function App() {
       endGame();
       return;
     }
-    const newField = updateField(row, col, section => {
+    const newField = updateField(field, row, col, section => {
       section.status = 'r';
       return section;
     });
@@ -122,35 +82,9 @@ function App() {
       revealNeighbors(newField, row, col);
     }
     setField(newField);
-    if (hasWonGame(newField)) {
+    if (hasWonGame(newField, setDifficulty)) {
       clearInterval(timerID);
       setGameWon(true);
-    }
-  }
-
-  function hasWonGame(field) {
-    for (let row = 0; row < FIELD_HEIGHT[setDifficulty]; row++) {
-      for (let col = 0; col < FIELD_WIDTH[setDifficulty]; col++) {
-        if (field[row][col].content !== -1 && field[row][col].status === 'h') {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  function revealNeighbors(newField, row, col) {
-    for (let r = row - 1; r <= row + 1; r++) {
-      for (let c = col - 1; c <= col + 1; c++) {
-        if (newField[r] && newField[r][c] && (r !== row || c !== col)) {
-          if (newField[r][c].content !== -1 && newField[r][c].status === 'h') {
-            newField[r][c].status = 'r';
-            if (newField[r][c].content === 0) {                
-              revealNeighbors(newField, r, c);
-            }
-          }
-        }
-      }
     }
   }
 
