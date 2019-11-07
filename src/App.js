@@ -1,19 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Section from './components/section';
-import { DIFFICULTY } from './constants';
+import { DIFFICULTY, FIELD_WIDTH, FIELD_HEIGHT, BOMB_FREQ } from './constants';
 import './App.css';
-
-const FIELD_WIDTH = {
-  [DIFFICULTY.EASY]: 5,
-  [DIFFICULTY.MED]: 10,
-  [DIFFICULTY.HARD]: 25
-};
-const FIELD_HEIGHT = {
-  [DIFFICULTY.EASY]: 5,
-  [DIFFICULTY.MED]: 10,
-  [DIFFICULTY.HARD]: 15
-};
-const BOMB_FREQ = .15;
 
 let setDifficulty = DIFFICULTY.MED;
 let timerID;
